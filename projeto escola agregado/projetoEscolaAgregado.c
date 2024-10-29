@@ -421,6 +421,38 @@ void listarProfessor(Professor listaProfessor[], int qtdProfessor){
     }
 }
 
+void listarProfessorPorIdade(Professor listaProfessor[], int qtdProfessor) {
+    Auxiliar auxiliar[TAM_PROFESSOR];
+
+    // Calcular a idade e preencher a estrutura auxiliar
+    for (int i = 0; i < qtdProfessor; i++) {
+        if (listaProfessor[i].ativo) {
+            auxiliar[i].matricula = listaProfessor[i].matricula;
+            auxiliar[i].idade = calcularIdade(listaProfessor[i].nascimento);
+        }
+    }
+
+    // Ordenar a estrutura auxiliar por idade
+    qsort(auxiliar, qtdProfessor, sizeof(Auxiliar), comparar);
+
+    // Imprimir os alunos por idade
+    printf("Alunos listados por idade:\n");
+    for (int i = 0; i < qtdProfessor; i++) {
+        for (int j = 0; j < qtdProfessor; j++) {
+            if (listaProfessor[j].ativo && listaProfessor[j].matricula == auxiliar[i].matricula) {
+                printf("Matrícula: %d\n", listaProfessor[j].matricula);
+                printf("Nome: %s\n", listaProfessor[j].nome);
+                printf("Sexo: %c\n", listaProfessor[j].sexo);
+                printf("Data de Nascimento: %d/%d/%d\n", listaProfessor[j].nascimento.dia, listaProfessor[j].nascimento.mes, listaProfessor[j].nascimento.ano);
+                printf("CPF: %s\n", listaProfessor[j].cpf);
+                printf("Idade: %d\n", auxiliar[i].idade);
+                printf("--------------------------------------\n");
+                break;
+            }
+        }
+    }
+}
+
 int atualizarProfessor(Professor listaProfessor[], int qtdProfessor){
 
     printf("Atualizar Professor!\n");
@@ -669,8 +701,20 @@ int menuRelatorioAluno(){
     printf("0 - Sair\n");
     printf("1 - Listar por Sexo\n");
     printf("2 - Listar Por Nome\n");
-    printf("3 - Listar por Data de Nacimento\n");
+    printf("3 - Listar por Data de Nascimento\n");
     printf("4 - Listar Alunos em Menos de 3 Matérias\n");
+    printf("Digite sua opção:");
+    scanf("%d",&opcao);
+    return opcao;
+}
+
+int menuRelatorioProfessor(){
+    int opcao;
+    printf("Menu Relatório de Professores\n");
+    printf("0 - Sair\n");
+    printf("1 - Listar por Sexo\n");
+    printf("2 - Listar Por Nome\n");
+    printf("3 - Listar por Data de Nascimento\n");
     printf("Digite sua opção:");
     scanf("%d",&opcao);
     return opcao;
@@ -708,6 +752,46 @@ void ListarAlunoPorSexo(Aluno listaAluno[], int qtdAluno){
             for(int i = 0; i <qtdAluno;i++){
                 if(listaAluno[i].sexo == 'F'){
                     puts(listaAluno[i].nome);
+
+                }
+            }
+
+        }
+    }
+}
+
+void ListarProfessorPorNome(Professor listaProfessor[],int qtdProfessor){
+    for (char i = 'A'; i <= 'Z'; i++){
+        for (int j = 0; j < qtdProfessor; j++){
+            if (listaProfessor[j].nome[0] == i){
+                puts(listaProfessor[j].nome);
+            }
+        }
+    }
+}
+
+void ListarProfessorPorSexo(Professor listaProfessor[],int qtdProfessor){
+    char escolha;
+    printf("Digite o sexo: ");
+    while(getchar() != '\n');
+    scanf("%c",&escolha);
+    escolha = toupper(escolha);
+    if (escolha != 'F' && escolha != 'M'){
+        printf("Opção Invalida");
+    }
+    else{
+        if(escolha == 'M'){
+            for(int i = 0; i <qtdProfessor;i++){
+                if(listaProfessor[i].sexo == 'M'){
+                    puts(listaProfessor[i].nome);
+
+                }
+            }
+        }
+        else{
+            for(int i = 0; i <qtdProfessor;i++){
+                if(listaProfessor[i].sexo == 'F'){
+                    puts(listaProfessor[i].nome);
 
                 }
             }
@@ -929,6 +1013,33 @@ int main() {
                             break;
                         }
                         case 2: {
+                            int sairRelatorioProfessor = 0;
+                            while (!sairRelatorioProfessor){
+                                int opcaoRelatorioProfessor = menuRelatorioProfessor();
+                                switch(opcaoRelatorioProfessor){
+                                    case 0:{
+                                    sairRelatorioProfessor = 1;
+                                    break;
+                                    }
+                                    case 1:{
+                                    printf("Listar Professores Ordenados por Sexo\n");
+                                    ListarProfessorPorSexo(listaProfessor, qtdProfessor);
+                                    break;
+                                    }
+                                    case 2:{
+                                    printf("Listar Professores Ordenados por Nome\n");
+                                    ListarProfessorPorNome(listaProfessor, qtdProfessor);
+                                    break;
+                                    }
+                                    case 3:{
+                                    printf("Listar Professores por Data de Nascimento\n");
+                                    listarProfessorPorIdade(listaProfessor, qtdProfessor);
+                                    break;
+                                    }
+
+                                }
+                            }
+                            break;
                         break;
                         }
                         case 3: {
