@@ -3,9 +3,10 @@
 #include <locale.h>
 #include <string.h>
 #include <stdbool.h>
-#define TAM_ALUNO 5
-#define TAM_PROFESSOR 5
-#define TAM_DISCIPLINA 5
+#include <time.h>
+#define TAM_ALUNO 10
+#define TAM_PROFESSOR 10
+#define TAM_DISCIPLINA 10
 #define CAD_SUCESSO -1
 #define MATRICULA_INVALIDA -2
 #define LISTA_CHEIA -3
@@ -16,7 +17,7 @@
 int menuGeral();
 int menuAluno();
 
-typedef struct dt {
+typedef struct dt{
     int dia;
     int mes;
     int ano;
@@ -31,6 +32,10 @@ typedef struct alu{
     int ativo;
  } Aluno;
 
+typedef struct aux{
+    int matricula;
+    int idade;
+} Auxiliar;
 
 typedef struct pro{
     int matricula;
@@ -40,7 +45,6 @@ typedef struct pro{
     char cpf[12];
     int ativo;
  } Professor;
-
 
 typedef struct dis{
     char nome[40];
@@ -72,6 +76,26 @@ bool validarData(DataNascimento data) {
     }
 
     return true;
+}
+
+int calcularIdade(DataNascimento nascimento) {
+    time_t t = time(0); // Pega a hora atual do sistema, tipo de dado definido da biblioteca time.h
+    struct tm * now = localtime(&t); //struct tm é uam estrutura da biblioteca time.h
+
+    int idade = now->tm_year + 1900 - nascimento.ano;
+
+    // Verifica se já passou o aniversário deste ano
+    if ((now->tm_mon + 1) < nascimento.mes || ((now->tm_mon + 1) == nascimento.mes && now->tm_mday < nascimento.dia)) {
+        idade--;
+    }
+
+    return idade;
+}
+
+int comparar(const void *a, const void *b) {        //Função que compara elementos da struct auxiliar (atua como ponteiro)
+    Auxiliar x = *(Auxiliar*)a;
+    Auxiliar y = *(Auxiliar*)b;
+    return (x.idade > y.idade) - (x.idade < y.idade);
 }
 
 //FUNÇÕES ALUNO
@@ -119,6 +143,7 @@ int cadastrarAluno(Aluno listaAluno[], int qtdAluno){
             getchar();
             fgets(listaAluno[qtdAluno].nome, sizeof(listaAluno[qtdAluno].nome), stdin);
             listaAluno[qtdAluno].nome[strcspn(listaAluno[qtdAluno].nome, "\n")] = 0;
+            listaAluno[qtdAluno].nome[0] = toupper(listaAluno[qtdAluno].nome[0]);
 
             printf("Digite o sexo (M/F): ");
             char sexo[3];
@@ -177,6 +202,38 @@ void listarAluno(Aluno listaAluno[], int qtdAluno){
     }
 }
 
+void listarAlunoPorIdade(Aluno listaAluno[], int qtdAluno) {
+    Auxiliar auxiliar[TAM_ALUNO];
+
+    // Calcular a idade e preencher a estrutura auxiliar
+    for (int i = 0; i < qtdAluno; i++) {
+        if (listaAluno[i].ativo) {
+            auxiliar[i].matricula = listaAluno[i].matricula;
+            auxiliar[i].idade = calcularIdade(listaAluno[i].nascimento);
+        }
+    }
+
+    // Ordenar a estrutura auxiliar por idade
+    qsort(auxiliar, qtdAluno, sizeof(Auxiliar), comparar);
+
+    // Imprimir os alunos por idade
+    printf("Alunos listados por idade:\n");
+    for (int i = 0; i < qtdAluno; i++) {
+        for (int j = 0; j < qtdAluno; j++) {
+            if (listaAluno[j].ativo && listaAluno[j].matricula == auxiliar[i].matricula) {
+                printf("Matrícula: %d\n", listaAluno[j].matricula);
+                printf("Nome: %s\n", listaAluno[j].nome);
+                printf("Sexo: %c\n", listaAluno[j].sexo);
+                printf("Data de Nascimento: %d/%d/%d\n", listaAluno[j].nascimento.dia, listaAluno[j].nascimento.mes, listaAluno[j].nascimento.ano);
+                printf("CPF: %s\n", listaAluno[j].cpf);
+                printf("Idade: %d\n", auxiliar[i].idade);
+                printf("--------------------------------------\n");
+                break;
+            }
+        }
+    }
+}
+
 int atualizarAluno(Aluno listaAluno[], int qtdAluno){
     printf("Atualizar Aluno\n");
     printf("Digite a matrícula: ");
@@ -201,6 +258,7 @@ int atualizarAluno(Aluno listaAluno[], int qtdAluno){
                 getchar();
                 fgets(listaAluno[i].nome, sizeof(listaAluno[i].nome), stdin);
                 listaAluno[i].nome[strcspn(listaAluno[i].nome, "\n")] = 0;
+                listaAluno[i].nome[0] = toupper(listaAluno[i].nome[0]);
 
                 printf("Digite o sexo atualizado: ");
                 char sexo[3];
@@ -303,6 +361,7 @@ int cadastrarProfessor(Professor listaProfessor[], int qtdProfessor){
             getchar();
             fgets(listaProfessor[qtdProfessor].nome, sizeof(listaProfessor[qtdProfessor].nome), stdin);
             listaProfessor[qtdProfessor].nome[strcspn(listaProfessor[qtdProfessor].nome, "\n")] = 0;
+            listaProfessor[qtdProfessor].nome[0] = toupper(listaProfessor[qtdProfessor].nome[0]);
 
             printf("Digite o sexo (M/F): ");
             char sexo[3];
@@ -318,12 +377,13 @@ int cadastrarProfessor(Professor listaProfessor[], int qtdProfessor){
 
             bool retorno;
             do {
-                printf("Digite o novo dia de nascimento: ");
-                scanf(" %d", listaProfessor[qtdProfessor].nascimento.dia);
-                printf("Digite o novo mes de nascimento: ");
-                scanf(" %d", listaProfessor[qtdProfessor].nascimento.mes);
-                printf("Digite o novo ano de nascimento: ");
-                scanf(" %d", listaProfessor[qtdProfessor].nascimento.ano);
+                printf("Digite o dia de nascimento: ");
+                scanf("%d", &listaProfessor[qtdProfessor].nascimento.dia);
+                printf("Digite o mes de nascimento: ");
+                scanf("%d", &listaProfessor[qtdProfessor].nascimento.mes);
+                printf("Digite o ano de nascimento: ");
+                scanf("%d", &listaProfessor[qtdProfessor].nascimento.ano);
+                retorno = validarData(listaProfessor[qtdProfessor].nascimento);
                 if (!retorno){
                     printf("Digite a data novamente, dados inválidos!\n");
                 }
@@ -385,6 +445,7 @@ int atualizarProfessor(Professor listaProfessor[], int qtdProfessor){
                 getchar();
                 fgets(listaProfessor[i].nome, sizeof(listaProfessor[i].nome), stdin);
                 listaProfessor[i].nome[strcspn(listaProfessor[i].nome, "\n")] = 0;
+                listaProfessor[qtdProfessor].nome[0] = toupper(listaProfessor[qtdProfessor].nome[0]);
 
                 printf("Digite o sexo atualizado: ");
                 char sexo[3];
@@ -588,7 +649,7 @@ int excluirDisciplina(Disciplina listaDisciplina[], int qtdDisciplina){
 }
 
 //FUNÇÕES RELATÓRIOS
-int menuRelatório(){
+int menuRelatorio(){
     int opcao;
     printf("Relatórios\n");
     printf("0 - Sair\n");
@@ -600,6 +661,75 @@ int menuRelatório(){
     printf("6 - Turmas com mais de 40 vagas\n");
     scanf("%d", &opcao);
     return opcao;
+}
+
+int menuRelatorioAluno(){
+    int opcao;
+    printf("Menu Relatório de Alunos\n");
+    printf("0 - Sair\n");
+    printf("1 - Listar por Sexo\n");
+    printf("2 - Listar Por Nome\n");
+    printf("3 - Listar por Data de Nacimento\n");
+    printf("4 - Listar Alunos em Menos de 3 Matérias\n");
+    printf("Digite sua opção:");
+    scanf("%d",&opcao);
+    return opcao;
+}
+
+void ListarAlunoPorNome(Aluno listaAluno[],int qtdAluno){
+    for (char i = 'A'; i <= 'Z'; i++){
+        for (int j = 0; j < qtdAluno; j++){
+            if (listaAluno[j].nome[0] == i){
+                puts(listaAluno[j].nome);
+            }
+        }
+    }
+}
+
+void ListarAlunoPorSexo(Aluno listaAluno[], int qtdAluno){
+    char escolha;
+    printf("Digite o sexo: ");
+    while(getchar() != '\n');
+    scanf("%c",&escolha);
+    escolha = toupper(escolha);
+    if (escolha != 'F' && escolha != 'M'){
+        printf("Opção Invalida");
+    }
+    else{
+        if(escolha == 'M'){
+            for(int i = 0; i <qtdAluno;i++){
+                if(listaAluno[i].sexo == 'M'){
+                    puts(listaAluno[i].nome);
+
+                }
+            }
+        }
+        else{
+            for(int i = 0; i <qtdAluno;i++){
+                if(listaAluno[i].sexo == 'F'){
+                    puts(listaAluno[i].nome);
+
+                }
+            }
+
+        }
+    }
+}
+
+void AniversariantesDoMes(Aluno listaAluno[],int qtdAluno,Professor listaProfessor[],int qtdProfessor){
+    int mesAtual;
+    printf("Digite o mes atual:"); //FALTA VALIDAÇÃO
+    scanf("%d",&mesAtual);
+    for(int i = 0; i<qtdAluno;i++){
+        if(listaAluno[i].nascimento.mes == mesAtual){
+            puts(listaAluno[i].nome);
+        }
+    }
+    for(int i = 0; i<qtdProfessor;i++){
+        if(listaProfessor[i].nascimento.mes == mesAtual){
+            puts(listaProfessor[i].nome);
+        }
+    }
 }
 
 int main() {
@@ -759,14 +889,54 @@ int main() {
             case 4: {
                 int sairRelatorio = 0;
                 while (!sairRelatorio){
-                    opcaoRelatorio = menuRelatório();
+                    opcaoRelatorio = menuRelatorio();
                     switch (opcaoRelatorio){
                         case 0: {
                             sairRelatorio = 1;
                             break;
                         }
                         case 1: {
-
+                            int sairRelatorioAluno = 0;
+                            while (!sairRelatorioAluno){
+                                int opcaoRelatorioAluno = menuRelatorioAluno();
+                                switch(opcaoRelatorioAluno){
+                                    case 0:{
+                                    sairRelatorioAluno = 1;
+                                    break;
+                                    }
+                                    case 1:{
+                                    printf("Listar Alunos Ordenados por Sexo\n");
+                                    ListarAlunoPorSexo(listaAluno, qtdAluno);
+                                    break;
+                                    }
+                                    case 2:{
+                                    printf("Listar Alunos Ordenados por Nome\n");
+                                    ListarAlunoPorNome(listaAluno, qtdAluno);
+                                    break;
+                                    }
+                                    case 3:{
+                                    printf("Listar Alunos por Data de Nascimento\n");
+                                    listarAlunoPorIdade(listaAluno, qtdAluno);
+                                    break;
+                                    }
+                                    case 4:{
+                                    printf("Listar Alunos por Data de Nascimento\n");
+                                    listarAlunoPorIdade(listaAluno, qtdAluno);
+                                    break;
+                                    }
+                                }
+                            }
+                            break;
+                        }
+                        case 2: {
+                        break;
+                        }
+                        case 3: {
+                        break;
+                        }
+                        case 4: {
+                        AniversariantesDoMes(listaAluno, qtdAluno, listaProfessor, qtdProfessor);
+                        break;
                         }
                     }
                 }
@@ -782,5 +952,4 @@ int main() {
     }
     return 0;
 }
-
 
