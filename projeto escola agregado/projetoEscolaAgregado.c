@@ -79,6 +79,21 @@ bool validarData(DataNascimento data) {
     return true;
 }
 
+bool validarCpf(const char *cpf) {
+    // Remove pontos e traço e verifica se restam exatamente 11 dígitos
+    char cpf_limpo[12] = ""; // +1 para o terminador nulo e espaço extra por segurança
+    int i, j = 0;
+
+    for (i = 0; cpf[i]; ++i) {
+        if (isdigit(cpf[i])) {
+            cpf_limpo[j++] = cpf[i];
+        }
+    }
+    cpf_limpo[j] = '\0'; // Adiciona o terminador nulo no final da cópia
+
+    return strlen(cpf_limpo) == 11;
+}
+
 int calcularIdade(DataNascimento nascimento) {
     time_t t = time(0); // Pega a hora atual do sistema, tipo de dado definido da biblioteca time.h
     struct tm * now = localtime(&t); //struct tm é uam estrutura da biblioteca time.h
@@ -216,8 +231,14 @@ int cadastrarAluno(Aluno listaAluno[], int qtdAluno){
                 }
             } while (!retorno);
 
-            printf("Digite o cpf: ");
-            scanf(" %[^\n]", listaAluno[qtdAluno].cpf);
+            do {
+                printf("Digite o CPF: ");
+                scanf(" %[^\n]", &listaAluno[qtdAluno].cpf);
+                retorno = validarCpf(listaAluno[qtdAluno].cpf);
+                if (!retorno){
+                    printf("CPF inválido! Deve conter exatamente 11 dígitos numéricos.\n");
+                }
+            } while (!retorno);
 
             listaAluno[qtdAluno].ativo = 1;
             return CAD_SUCESSO;
@@ -331,9 +352,14 @@ int atualizarAluno(Aluno listaAluno[], int qtdAluno){
                     }
                 } while (!retorno);
 
-                printf("Digite o novo cpf (000.000.000-00): ");
-                scanf(" %[^\n]", listaAluno[i].cpf);
-
+                do {
+                    printf("Digite o CPF: ");
+                    scanf(" %[^\n]", &listaAluno[qtdAluno].cpf);
+                    retorno = validarCpf(listaAluno[qtdAluno].cpf);
+                    if (!retorno){
+                        printf("CPF inválido! Deve conter exatamente 11 dígitos numéricos.\n");
+                    }
+                } while (!retorno);
                 achou =1;
                 break;
             }
@@ -434,9 +460,14 @@ int cadastrarProfessor(Professor listaProfessor[], int qtdProfessor){
             } while (!retorno);
 
 
-            printf("Digite o cpf: ");
-            scanf(" %[^\n]", listaProfessor[qtdProfessor].cpf);
-
+            do {
+                printf("Digite o cpf: ");
+                scanf(" %[^\n]", &listaProfessor[qtdProfessor].cpf);
+                retorno = validarCpf(listaProfessor[qtdProfessor].cpf);
+                if (!retorno){
+                    printf("CPF inválido! Deve conter exatamente 11 dígitos numéricos.\n");
+                }
+            } while (!retorno);
             listaProfessor[qtdProfessor].ativo = 1;
             return CAD_SUCESSO;
         }
@@ -548,8 +579,14 @@ int atualizarProfessor(Professor listaProfessor[], int qtdProfessor){
                     }
                 } while (!retorno);
 
-                printf("Digite o novo cpf (000.000.000-00): ");
-                scanf(" %[^\n]", listaProfessor[i].cpf);
+                do {
+                    printf("Digite o cpf: ");
+                    scanf(" %[^\n]", &listaProfessor[qtdProfessor].cpf);
+                    retorno = validarCpf(listaProfessor[qtdProfessor].cpf);
+                    if (!retorno){
+                        printf("CPF inválido! Deve conter exatamente 11 dígitos numéricos.\n");
+                    }
+                } while (!retorno);
 
                 achou =1;
                 break;
@@ -1144,11 +1181,9 @@ int main() {
                 }
                 break;
             }
-
             default: {
                 printf("Opção inválida!\n");
                 break;
-
             }
         }
     }
