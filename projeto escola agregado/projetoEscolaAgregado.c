@@ -1,3 +1,4 @@
+
 //DECLARAÇÕES
 #include <stdio.h>
 #include <locale.h>
@@ -96,6 +97,49 @@ int comparar(const void *a, const void *b) {        //Função que compara eleme
     Auxiliar x = *(Auxiliar*)a;
     Auxiliar y = *(Auxiliar*)b;
     return (x.idade > y.idade) - (x.idade < y.idade);
+}
+
+//FUNÇÕES DE BUSCA POR NOME
+void buscarPorNome(char nomeBusca[], Aluno listaAluno[], int qtdAluno) {
+    int achou = 0;
+    printf("Resultados da busca:\n");
+    for (int i = 0; i < qtdAluno; i++) {
+        if (listaAluno[i].ativo == 1) {
+            if (strstr(listaAluno[i].nome, nomeBusca) != NULL) {
+                printf("Matrícula: %d\n", listaAluno[i].matricula);
+                printf("Nome: %s\n", listaAluno[i].nome);
+                printf("Sexo: %c\n", listaAluno[i].sexo);
+                printf("Data de Nascimento: %d/%d/%d\n", listaAluno[i].nascimento.dia, listaAluno[i].nascimento.mes, listaAluno[i].nascimento.ano);
+                printf("CPF: %s\n", listaAluno[i].cpf);
+                printf("--------------------------------------\n");
+                achou = 1;
+            }
+        }
+    }
+    if (!achou) {
+        printf("Nenhum aluno encontrado com o nome fornecido.\n");
+    }
+}
+
+void buscarPorNomeProfessor(char nomeBusca[], Professor listaProfessor[], int qtdProfessor) {
+    int achou = 0;
+    printf("Resultados da busca:\n");
+    for (int i = 0; i < qtdProfessor; i++) {
+        if (listaProfessor[i].ativo == 1) {
+            if (strstr(listaProfessor[i].nome, nomeBusca) != NULL) {
+                printf("Matrícula: %d\n", listaProfessor[i].matricula);
+                printf("Nome: %s\n", listaProfessor[i].nome);
+                printf("Sexo: %c\n", listaProfessor[i].sexo);
+                printf("Data de Nascimento: %d/%d/%d\n", listaProfessor[i].nascimento.dia, listaProfessor[i].nascimento.mes, listaProfessor[i].nascimento.ano);
+                printf("CPF: %s\n", listaProfessor[i].cpf);
+                printf("--------------------------------------\n");
+                achou = 1;
+            }
+        }
+    }
+    if (!achou) {
+        printf("Nenhum professor encontrado com o nome fornecido.\n");
+    }
 }
 
 //FUNÇÕES ALUNO
@@ -690,7 +734,6 @@ int menuRelatorio(){
     printf("3 - Relatórios de Disciplina\n");
     printf("4 - Aniversariante do Mês\n");
     printf("5 - Busca por Nome\n");
-    printf("6 - Turmas com mais de 40 vagas\n");
     scanf("%d", &opcao);
     return opcao;
 }
@@ -715,6 +758,16 @@ int menuRelatorioProfessor(){
     printf("1 - Listar por Sexo\n");
     printf("2 - Listar Por Nome\n");
     printf("3 - Listar por Data de Nascimento\n");
+    printf("Digite sua opção:");
+    scanf("%d",&opcao);
+    return opcao;
+}
+
+int menuRelatorioDisciplina(){
+    int opcao;
+    printf("0 - Sair\n");
+    printf("1 - Detalhar Matéria e alunos matriculados\n");
+    printf("2 - Matérias com mais de 40 alunos\n");
     printf("Digite sua opção:");
     scanf("%d",&opcao);
     return opcao;
@@ -1004,8 +1057,12 @@ int main() {
                                     break;
                                     }
                                     case 4:{
-                                    printf("Listar Alunos por Data de Nascimento\n");
+                                    printf("Listar Alunos com menos de 3 Matérias\n");
                                     listarAlunoPorIdade(listaAluno, qtdAluno);
+                                    break;
+                                    }
+                                    default: {
+                                    printf("Opção Inválida\n");
                                     break;
                                     }
                                 }
@@ -1043,10 +1100,44 @@ int main() {
                         break;
                         }
                         case 3: {
+                            int sairRelatorioDisciplina = 0;
+                            while (!sairRelatorioDisciplina){
+                                int opcaoRelatorioDisciplina = menuRelatorioDisciplina();
+                                switch(opcaoRelatorioDisciplina){
+                                    case 0: {
+                                    sairRelatorioDisciplina = 1;
+                                    break;
+                                    }
+                                    case 1: {
+                                    printf("Detalhar Disciplina(lista de alunos inclusa)");
+                                    break;
+                                    }
+                                    case 2: {
+                                    printf("Disciplinas com mais de 40 alunos");
+                                    break;
+                                    }
+                                    default: {
+                                    printf("Opção Inválida\n");
+                                    break;
+                        }
+                                }
+                            }
                         break;
                         }
                         case 4: {
                         AniversariantesDoMes(listaAluno, qtdAluno, listaProfessor, qtdProfessor);
+                        break;
+                        }
+                        case 5: {
+                        char nomeBusca[40];
+                        printf("Digite pelo menos 3 caracteres do nome para buscar: ");
+                        scanf("%s", nomeBusca);
+                        buscarPorNome(nomeBusca, listaAluno, qtdAluno);
+                        buscarPorNomeProfessor(nomeBusca, listaProfessor, qtdProfessor);
+                        break;
+                        }
+                        default: {
+                        printf("Opção Inválida\n");
                         break;
                         }
                     }
