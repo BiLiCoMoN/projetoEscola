@@ -1,3 +1,52 @@
+#define MAX_ALUNOS_POR_DISCIPLINA 40
+
+typedef struct dis {
+    char nome[40];
+    char codigo[6];
+    int semestre;
+    int professor;
+    int alunos[TAM_ALUNO];
+    int numAlunos; // Novo campo para rastrear o número de alunos matriculados
+    int ativo;
+} Disciplina;
+
+// Função para matricular um aluno em uma disciplina
+int matricularAluno(Disciplina listaDisciplina[], int qtdDisciplina, int matriculaAluno) {
+    for (int i = 0; i < qtdDisciplina; i++) {
+        if (listaDisciplina[i].ativo && listaDisciplina[i].numAlunos < MAX_ALUNOS_POR_DISCIPLINA) {
+            for (int j = 0; j < TAM_ALUNO; j++) {
+                if (listaDisciplina[i].alunos[j] == 0) { // Encontrou um slot vazio
+                    listaDisciplina[i].alunos[j] = matriculaAluno;
+                    listaDisciplina[i].numAlunos++;
+                    return CAD_SUCESSO; // Matrícula realizada com sucesso
+                }
+            }
+        }
+    }
+    return LISTA_CHEIA; // Não foi possível matricular o aluno
+}
+
+// Função para listar alunos com menos de 3 disciplinas
+void listarAlunosComPoucasDisciplinas(Aluno listaAluno[], int qtdAluno, Disciplina listaDisciplina[], int qtdDisciplina) {
+    for (int i = 0; i < qtdAluno; i++) {
+        int numDisciplinas = 0;
+        for (int j = 0; j < qtdDisciplina; j++) {
+            for (int k = 0; k < listaDisciplina[j].numAlunos; k++) {
+                if (listaDisciplina[j].alunos[k] == listaAluno[i].matricula) {
+                    numDisciplinas++;
+                    break;
+                }
+            }
+        }
+        if (numDisciplinas < 3) {
+            printf("Matrícula: %d\n", listaAluno[i].matricula);
+            printf("Nome: %s\n", listaAluno[i].nome);
+            printf("Número de disciplinas: %d\n", numDisciplinas);
+            printf("--------------------------------------\n");
+        }
+    }
+}
+
 // Função para listar disciplinas com mais de 40 alunos
 void listarDisciplinasComMuitosAlunos(Disciplina listaDisciplina[], int qtdDisciplina) {
     for (int i = 0; i < qtdDisciplina; i++) {
