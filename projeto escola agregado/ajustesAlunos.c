@@ -88,3 +88,45 @@ void detalharDisciplina(Disciplina listaDisciplina[], int qtdDisciplina, Aluno l
     }
     printf("Disciplina não encontrada ou não está ativa.\n");
 }
+
+
+
+-------------------------------------------------------
+    #define MAX_ALUNOS_POR_DISCIPLINA 40
+#define TAM_ALUNO 100 // Exemplo de tamanho máximo de alunos
+
+typedef struct dis {
+    char nome[40];
+    char codigo[6];
+    int semestre;
+    int id_professor; // ID do professor que leciona a disciplina
+    int alunos[TAM_ALUNO];
+    int numAlunos; // Número de alunos matriculados
+    int ativo;
+} Disciplina;
+
+typedef struct professor {
+    int id;
+    char nome[100];
+} Professor;
+
+// ... Outras funções existentes ...
+
+// Função para listar professores com turmas com mais de 40 alunos
+void listarProfessoresComTurmasGrandes(Disciplina listaDisciplina[], int qtdDisciplina, Professor listaProfessor[], int qtdProfessor) {
+    for (int i = 0; i < qtdDisciplina; i++) {
+        if (listaDisciplina[i].numAlunos > MAX_ALUNOS_POR_DISCIPLINA && listaDisciplina[i].ativo) {
+            for (int j = 0; j < qtdProfessor; j++) {
+                if (listaDisciplina[i].id_professor == listaProfessor[j].id) {
+                    printf("Professor: %s\n", listaProfessor[j].nome);
+                    printf("Disciplina: %s\n", listaDisciplina[i].nome);
+                    printf("Número de alunos: %d\n", listaDisciplina[i].numAlunos);
+                    printf("--------------------------------------\n");
+                    break; // Sai do loop após encontrar o professor correspondente
+                }
+            }
+        }
+    }
+}
+
+// ... Restante do código existente ...
